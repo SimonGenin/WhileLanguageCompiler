@@ -162,15 +162,32 @@ case class WhileExecution(expression: WhileAST, statement: WhileAST) extends Whi
     override def toString: String = {
 
         val Y = "λy.(λx.y(xx))(λx.y(xx))"
+        val r = statement.toString
+        val n = expression.toString
 
-        "WHILE " +  "(" + expression.toString + ")" + " " + "(" + statement.toString + ")"
+        val T = "(λxy.x)"
+        val F = "(λxy.y)"
+        val not = s"(λx. x $F$T)"
 
+        val Z = s"λx. x $F $not $F"
 
+        val S = "λwyx. y (w y x)"
+
+        val ADD = s"λxy. x ($S) y"
+
+        // val w = s"λrn. $Z n 0 (r ( ($ADD) n (${MakeNumeric("1").toString}) ) )"
+        val w = s"λrn. $Z n 0 (r (n) )"
+
+        s"$Y ($w $r $n)"
 
     }
 
 }
 
+
+case class Nothing() extends WhileAST {
+    override def toString: String = ""
+}
 
 case class ExecuteStatement(s1: WhileAST, s2: WhileAST) extends WhileAST {
 
@@ -277,7 +294,13 @@ object WhileParser extends Parsers
             }
         }
 
-         whileStatement  | following | assignation
+        val test = {
+            O_P ~ C_P ^^ {
+                case _ ~ _ => Nothing()
+            }
+        }
+
+         whileStatement  | following | assignation | test
 
     }
 
@@ -298,7 +321,8 @@ object TestWhileParser  {
     def main(args: Array[String]): Unit = {
 
         // yolo print(WhileCompiler("(:= (var (quote 5)) )"))
-        print(WhileCompiler("( ; (:= (var 5) (quote 3) ) ( while (?= (var 5) (var 5)) ( := (var 2) (quote 1) ) ) )"))
+        // print(WhileCompiler("( ; (:= (var 5) (quote 3) ) ( while (?= (var 5) (var 5)) ( := (var 2) (quote 1) ) ) )"))
+        print(WhileCompiler("( while (quote ) () )"))
         // print(WhileCompiler("(cons (var 5) (quote 4))"))
 
         // (:= (var 5) (quote 3) )
